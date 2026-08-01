@@ -1,37 +1,40 @@
-'use client';
-
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { ArrowRight, ArrowLeft, Check, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { notFound } from 'next/navigation';
+import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import PageHero from '@/components/PageHero';
 import { Reveal } from '@/components/Reveal';
 import { getService, services } from '@/data/services';
-import NotFound from '@/app/not-found';
+
+export function generateStaticParams() {
+  return services.map((service) => ({
+    slug: service.slug,
+  }));
+}
 
 function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-slate-100">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-4 py-5 text-left"
-      >
-        <span className="font-semibold text-slate-900">{q}</span>
-        <ChevronDown className={`h-5 w-5 shrink-0 text-brand-500 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      <div className={`overflow-hidden transition-all duration-300 ${open ? 'max-h-48 pb-5' : 'max-h-0'}`}>
-        <p className="text-sm leading-relaxed text-slate-500">{a}</p>
-      </div>
+    <div className="border-b border-slate-100 py-5">
+      <h3 className="font-semibold text-slate-900">{q}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-slate-500">
+        {a}
+      </p>
     </div>
   );
 }
 
-export default function ServiceDetail() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const service = getService(slug);
-  if (!service) return <NotFound />;
+      
+export default async function ServiceDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+const service = getService(slug);
+
+if (!service) {
+  notFound();
+}
 
   const others = services.filter((s) => s.slug !== service.slug).slice(0, 3);
 

@@ -1,18 +1,26 @@
-'use client';
-
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ExternalLink, Check } from 'lucide-react';
 import PageHero from '@/components/PageHero';
 import { Reveal } from '@/components/Reveal';
 import { getProject, projects } from '@/data/projects';
-import NotFound from '@/app/not-found';
+export function generateStaticParams() {
+  return projects.map((project) => ({
+    slug: project.slug,
+  }));
+}
+export default async function ProjectDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+   const { slug } = await params;
 
-export default function ProjectDetail() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const project = getProject(slug);
-  if (!project) return <NotFound />;
+const project = getProject(slug);
+
+if (!project) {
+  notFound();
+}
 
   const others = projects.filter((p) => p.slug !== project.slug).slice(0, 3);
 
